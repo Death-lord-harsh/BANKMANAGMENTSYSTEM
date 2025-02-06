@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
-#include <cstdlib> // for atof and system
+#include <cstdlib> // for atof
 
 using namespace std;
 
@@ -74,38 +74,71 @@ public:
 
     void deposit(double amount) {
         balance += amount;
-        logTransaction("Deposit", amount);
         updateFile();
     }
 
     void withdraw(double amount) {
         if (amount <= balance) {
             balance -= amount;
-            logTransaction("Withdraw", amount);
             updateFile();
         } else {
             cout << "Insufficient balance." << endl;
         }
     }
 
-    void viewTransactionHistory() {
-        ifstream inFile("money.txt");
-        if (inFile.is_open()) {
+    bool deleteAccount(const string& accNum, const string& pass) {
+        ifstream inFile("accounts.txt");
+        ofstream tempFile("temp.txt");
+        bool accountDeleted = false;
+        if (inFile.is_open() && tempFile.is_open()) {
             string line;
-            cout << left << setw(10) << "Type" << setw(10) << "Amount" << setw(10) << "Balance" << endl;
-            cout << "-----------------------------------" << endl;
             while (getline(inFile, line)) {
                 stringstream ss(line);
-                string type, amountStr, balanceStr;
-                getline(ss, type, ',');
-                getline(ss, amountStr, ',');
-                getline(ss, balanceStr, ',');
-                cout << left << setw(10) << type << setw(10) << amountStr << setw(10) << balanceStr << endl;
+                string storedAccNum, storedAccHolder, storedBalanceStr, storedPassword;
+                getline(ss, storedAccNum, ',');
+                getline(ss, storedAccHolder, ',');
+                getline(ss, storedBalanceStr, ',');
+                getline(ss, storedPassword, ',');
+                if (!(storedAccNum == accNum && storedPassword == pass)) {
+                    tempFile << line << endl;
+                } else {
+                    accountDeleted = true;
+                }
             }
             inFile.close();
+            tempFile.close();
+            remove("accounts.txt");
+            rename("temp.txt", "accounts.txt");
         } else {
-            cout << "No transaction history found." << endl;
+            cout << "Unable to open file for updating." << endl;
         }
+        return accountDeleted;
+    }
+
+    void viewAccountDetails() {
+        cout << "Account Number: " << accountNumber << endl;
+        cout << "Account Holder: " << accountHolder << endl;
+        cout << "Balance: " << fixed << setprecision(2) << balance << endl;
+    }
+
+    void changePassword(const string& newPass) {
+        password = newPass;
+        updateFile();
+        cout << "Password changed successfully!" << endl;
+    }
+
+    void viewTransactionHistory() {
+        // Implement transaction history viewing functionality here
+    }
+
+    void updateAccountInformation(const string& newAccountHolder) {
+        accountHolder = newAccountHolder;
+        updateFile();
+        cout << "Account information updated successfully!" << endl;
+    }
+
+    void closeAccount() {
+        // Implement account closing functionality here
     }
 
 private:
@@ -147,29 +180,11 @@ private:
             cout << "Unable to open file for updating." << endl;
         }
     }
-
-    void logTransaction(const string& type, double amount) {
-        ofstream outFile("money.txt", ios::app);
-        if (outFile.is_open()) {
-            outFile << type << "," << amount << "," << fixed << setprecision(2) << balance << endl;
-            outFile.close();
-        } else {
-            cout << "Unable to open transaction log file." << endl;
-        }
-    }
 };
 
 bool adminLogin(const string& adminPass) {
-    const string correctAdminPass = "admin123"; // Example admin password
+    const string correctAdminPass = "1234"; // Admin password set to 1234
     return adminPass == correctAdminPass;
-}
-
-void clearScreen() {
-#ifdef _WIN32
-    system("CLS");
-#else
-    system("clear");
-#endif
 }
 
 int main() {
@@ -178,23 +193,14 @@ int main() {
 
     while (true) {
         cout << "Bank Management System" << endl;
-        cout << "1. Create Account" << endl;
-        cout << "2. Show Accounts" << endl;
-        cout << "3. Login" << endl;
-        cout << "4. Admin Login" << endl;
-        cout << "5. Exit" << endl;
+        cout << "1. Login" << endl;
+        cout << "2. Admin Login" << endl;
+        cout << "3. Exit" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
-        clearScreen(); // Clear the screen after entering the choice
 
         switch (choice) {
-            case 1:
-                account.createAccount();
-                break;
-            case 2:
-                account.showAccounts();
-                break;
-            case 3: {
+            case 1: {
                 string accNum, pass;
                 cout << "Enter Account Number: ";
                 cin >> accNum;
@@ -206,11 +212,11 @@ int main() {
                     while (true) {
                         cout << "1. Deposit" << endl;
                         cout << "2. Withdraw" << endl;
-                        cout << "3. View Transaction History" << endl;
-                        cout << "4. Logout" << endl;
+                        cout << "3. View Account Details" << endl;
+                        cout << "4. Change Password" << endl;
+                        cout << "5. Logout" << endl;
                         cout << "Enter your choice: ";
                         cin >> transChoice;
-                        clearScreen(); // Clear the screen after entering the choice
                         if (transChoice == 1) {
                             double amount;
                             cout << "Enter amount to deposit: ";
@@ -224,8 +230,13 @@ int main() {
                             account.withdraw(amount);
                             cout << "Withdrawal successful. New balance: " << account.balance << endl;
                         } else if (transChoice == 3) {
-                            account.viewTransactionHistory();
+                            account.viewAccountDetails();
                         } else if (transChoice == 4) {
+                            string newPass;
+                            cout << "Enter new password: ";
+                            cin >> newPass;
+                            account.changePassword(newPass);
+                        } else if (transChoice == 5) {
                             break;
                         } else {
                             cout << "Invalid choice. Please try again." << endl;
@@ -236,19 +247,59 @@ int main() {
                 }
                 break;
             }
-            case 4: {
+            case 2: {
                 string adminPass;
                 cout << "Enter Admin Password: ";
                 cin >> adminPass;
                 if (adminLogin(adminPass)) {
                     cout << "Admin login successful!" << endl;
-                    // Add admin-specific functionality here
+                    int adminChoice;
+                    while (true) {
+                        cout << "1. Show Accounts" << endl;
+                        cout << "2. Create Account" << endl;
+                        cout << "3. Delete Account" << endl;
+                        cout << "4. View Transaction History" << endl;
+                        cout << "5. Update Account Information" << endl;
+                        cout << "6. Close Account" << endl;
+                        cout << "7. Logout" << endl;
+                        cout << "Enter your choice: ";
+                        cin >> adminChoice;
+                        if (adminChoice == 1) {
+                            account.showAccounts();
+                        } else if (adminChoice == 2) {
+                            account.createAccount();
+                        } else if (adminChoice == 3) {
+                            string accNum, pass;
+                            cout << "Enter Account Number to delete: ";
+                            cin >> accNum;
+                            cout << "Enter Password: ";
+                            cin >> pass;
+                            if (account.deleteAccount(accNum, pass)) {
+                                cout << "Account deleted successfully." << endl;
+                            } else {
+                                cout << "Invalid account number or password. Account not deleted." << endl;
+                            }
+                        } else if (adminChoice == 4) {
+                            account.viewTransactionHistory();
+                        } else if (adminChoice == 5) {
+                            string newAccountHolder;
+                            cout << "Enter new account holder name: ";
+                            cin >> newAccountHolder;
+                            account.updateAccountInformation(newAccountHolder);
+                        } else if (adminChoice == 6) {
+                            account.closeAccount();
+                        } else if (adminChoice == 7) {
+                            break;
+                        } else {
+                            cout << "Invalid choice. Please try again." << endl;
+                        }
+                    }
                 } else {
                     cout << "Invalid admin password." << endl;
                 }
                 break;
             }
-            case 5:
+            case 3:
                 return 0;
             default:
                 cout << "Invalid choice. Please try again." << endl;
