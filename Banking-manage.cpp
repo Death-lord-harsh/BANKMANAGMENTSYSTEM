@@ -3,9 +3,26 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
-#include <cstdlib> // for atof
+#include <cstdlib> // for atof and system
+#include <ctime>   // for timestamp
 
 using namespace std;
+
+void clearScreen() {
+#ifdef _WIN32
+    system("CLS");
+#else
+    system("clear");
+#endif
+}
+
+void setColor(const string& colorCode) {
+    cout << "\033[" << colorCode << "m";
+}
+
+void resetColor() {
+    cout << "\033[0m";
+}
 
 class Account {
 public:
@@ -15,13 +32,21 @@ public:
     string password;
 
     void createAccount() {
+        setColor("1;32"); // Bold Green
         cout << "Enter Account Number: ";
+        resetColor();
         cin >> accountNumber;
+        setColor("1;32"); // Bold Green
         cout << "Enter Account Holder Name: ";
+        resetColor();
         cin >> accountHolder;
+        setColor("1;32"); // Bold Green
         cout << "Enter Initial Balance: ";
+        resetColor();
         cin >> balance;
+        setColor("1;32"); // Bold Green
         cout << "Set Password: ";
+        resetColor();
         cin >> password;
         saveToFile();
     }
@@ -54,8 +79,10 @@ public:
         ifstream inFile("accounts.txt");
         if (inFile.is_open()) {
             string line;
+            setColor("1;34"); // Bold Blue
             cout << left << setw(15) << "Account Number" << setw(25) << "Account Holder" << setw(10) << "Balance" << endl;
             cout << "-------------------------------------------------------------" << endl;
+            resetColor();
             while (getline(inFile, line)) {
                 stringstream ss(line);
                 string accountNumber, accountHolder, balanceStr, password;
@@ -64,25 +91,45 @@ public:
                 getline(ss, balanceStr, ',');
                 getline(ss, password, ',');
                 double balance = atof(balanceStr.c_str());
+                setColor("0;36"); // Cyan
                 cout << left << setw(15) << accountNumber << setw(25) << accountHolder << setw(10) << fixed << setprecision(2) << balance << endl;
+                resetColor();
             }
             inFile.close();
         } else {
+            setColor("1;31"); // Bold Red
             cout << "Unable to open file for reading." << endl;
+            resetColor();
         }
     }
 
     void deposit(double amount) {
+        if (amount <= 0) {
+            setColor("1;31"); // Bold Red
+            cout << "Invalid deposit amount." << endl;
+            resetColor();
+            return;
+        }
         balance += amount;
+        logTransaction("Deposit", amount);
         updateFile();
     }
 
     void withdraw(double amount) {
+        if (amount <= 0) {
+            setColor("1;31"); // Bold Red
+            cout << "Invalid withdrawal amount." << endl;
+            resetColor();
+            return;
+        }
         if (amount <= balance) {
             balance -= amount;
+            logTransaction("Withdraw", amount);
             updateFile();
         } else {
+            setColor("1;31"); // Bold Red
             cout << "Insufficient balance." << endl;
+            resetColor();
         }
     }
 
@@ -110,35 +157,74 @@ public:
             remove("accounts.txt");
             rename("temp.txt", "accounts.txt");
         } else {
+            setColor("1;31"); // Bold Red
             cout << "Unable to open file for updating." << endl;
+            resetColor();
         }
         return accountDeleted;
     }
 
     void viewAccountDetails() {
+        setColor("1;34"); // Bold Blue
         cout << "Account Number: " << accountNumber << endl;
         cout << "Account Holder: " << accountHolder << endl;
         cout << "Balance: " << fixed << setprecision(2) << balance << endl;
+        resetColor();
     }
 
     void changePassword(const string& newPass) {
+        if (newPass.empty()) {
+            setColor("1;31"); // Bold Red
+            cout << "Password cannot be empty." << endl;
+            resetColor();
+            return;
+        }
         password = newPass;
         updateFile();
+        setColor("1;32"); // Bold Green
         cout << "Password changed successfully!" << endl;
+        resetColor();
     }
 
     void viewTransactionHistory() {
-        // Implement transaction history viewing functionality here
+        ifstream inFile("transactions.txt");
+        if (inFile.is_open()) {
+            string line;
+            setColor("1;34"); // Bold Blue
+            cout << left << setw(10) << "Type" << setw(10) << "Amount" << setw(10) << "Balance" << setw(20) << "Timestamp" << endl;
+            cout << "------------------------------------------------------------" << endl;
+            resetColor();
+            while (getline(inFile, line)) {
+                stringstream ss(line);
+                string type, amountStr, balanceStr, timestamp;
+                getline(ss, type, ',');
+                getline(ss, amountStr, ',');
+                getline(ss, balanceStr, ',');
+                getline(ss, timestamp, ',');
+                setColor("0;36"); // Cyan
+                cout << left << setw(10) << type << setw(10) << amountStr << setw(10) << balanceStr << setw(20) << timestamp << endl;
+                resetColor();
+            }
+            inFile.close();
+        } else {
+            setColor("1;31"); // Bold Red
+            cout << "No transaction history found." << endl;
+            resetColor();
+        }
     }
 
     void updateAccountInformation(const string& newAccountHolder) {
+        if (newAccountHolder.empty()) {
+            setColor("1;31"); // Bold Red
+            cout << "Account holder name cannot be empty." << endl;
+            resetColor();
+            return;
+        }
         accountHolder = newAccountHolder;
         updateFile();
+        setColor("1;32"); // Bold Green
         cout << "Account information updated successfully!" << endl;
-    }
-
-    void closeAccount() {
-        // Implement account closing functionality here
+        resetColor();
     }
 
 private:
@@ -147,9 +233,13 @@ private:
         if (outFile.is_open()) {
             outFile << accountNumber << "," << accountHolder << "," << balance << "," << password << endl;
             outFile.close();
+            setColor("1;32"); // Bold Green
             cout << "Account created and saved successfully!" << endl;
+            resetColor();
         } else {
+            setColor("1;31"); // Bold Red
             cout << "Unable to open file for writing." << endl;
+            resetColor();
         }
     }
 
@@ -177,7 +267,23 @@ private:
             remove("accounts.txt");
             rename("temp.txt", "accounts.txt");
         } else {
+            setColor("1;31"); // Bold Red
             cout << "Unable to open file for updating." << endl;
+            resetColor();
+        }
+    }
+
+    void logTransaction(const string& type, double amount) {
+        ofstream outFile("transactions.txt", ios::app);
+        if (outFile.is_open()) {
+            time_t now = time(0);
+            char* dt = ctime(&now);
+            outFile << type << "," << amount << "," << balance << "," << dt;
+            outFile.close();
+        } else {
+            setColor("1;31"); // Bold Red
+            cout << "Unable to open file for logging transaction." << endl;
+            resetColor();
         }
     }
 };
@@ -192,117 +298,203 @@ int main() {
     int choice;
 
     while (true) {
+        setColor("1;34"); // Bold Blue
         cout << "Bank Management System" << endl;
+        setColor("1;32"); // Bold Green
         cout << "1. Login" << endl;
         cout << "2. Admin Login" << endl;
         cout << "3. Exit" << endl;
+        setColor("1;33"); // Bold Yellow
         cout << "Enter your choice: ";
+        resetColor();
         cin >> choice;
+        clearScreen();
 
         switch (choice) {
             case 1: {
                 string accNum, pass;
+                setColor("1;33"); // Bold Yellow
                 cout << "Enter Account Number: ";
+                resetColor();
                 cin >> accNum;
+                setColor("1;33"); // Bold Yellow
                 cout << "Enter Password: ";
+                resetColor();
                 cin >> pass;
                 if (account.login(accNum, pass)) {
+                    setColor("1;32"); // Bold Green
                     cout << "Login successful!" << endl;
+                    resetColor();
                     int transChoice;
                     while (true) {
+                        setColor("1;32"); // Bold Green
                         cout << "1. Deposit" << endl;
                         cout << "2. Withdraw" << endl;
                         cout << "3. View Account Details" << endl;
-                        cout << "4. Change Password" << endl;
-                        cout << "5. Logout" << endl;
+                        cout << "4. View Transaction History" << endl;
+                        cout << "5. Change Password" << endl;
+                        cout << "6. Logout" << endl;
+                        setColor("1;33"); // Bold Yellow
                         cout << "Enter your choice: ";
+                        resetColor();
                         cin >> transChoice;
+                        clearScreen();
                         if (transChoice == 1) {
                             double amount;
+                            setColor("1;33"); // Bold Yellow
                             cout << "Enter amount to deposit: ";
+                            resetColor();
                             cin >> amount;
                             account.deposit(amount);
+                            setColor("1;32"); // Bold Green
                             cout << "Deposit successful. New balance: " << account.balance << endl;
+                            resetColor();
                         } else if (transChoice == 2) {
                             double amount;
+                            setColor("1;33"); // Bold Yellow
                             cout << "Enter amount to withdraw: ";
+                            resetColor();
                             cin >> amount;
                             account.withdraw(amount);
+                            setColor("1;32"); // Bold Green
                             cout << "Withdrawal successful. New balance: " << account.balance << endl;
+                            resetColor();
                         } else if (transChoice == 3) {
                             account.viewAccountDetails();
+                            int backChoice;
+                            setColor("1;32"); // Bold Green
+                            cout << "1. Back to Account Menu" << endl;
+                            cout << "2. Main Menu" << endl;
+                            setColor("1;33"); // Bold Yellow
+                            cout << "Enter your choice: ";
+                            resetColor();
+                            cin >> backChoice;
+                            clearScreen();
+                            if (backChoice == 2) {
+                                break;
+                            }
                         } else if (transChoice == 4) {
+                            account.viewTransactionHistory();
+                            int backChoice;
+                            setColor("1;32"); // Bold Green
+                            cout << "1. Back to Account Menu" << endl;
+                            cout << "2. Main Menu" << endl;
+                            setColor("1;33"); // Bold Yellow
+                            cout << "Enter your choice: ";
+                            resetColor();
+                            cin >> backChoice;
+                            clearScreen();
+                            if (backChoice == 2) {
+                                break;
+                            }
+                        } else if (transChoice == 5) {
                             string newPass;
+                            setColor("1;33"); // Bold Yellow
                             cout << "Enter new password: ";
+                            resetColor();
                             cin >> newPass;
                             account.changePassword(newPass);
-                        } else if (transChoice == 5) {
+                        } else if (transChoice == 6) {
                             break;
                         } else {
+                            setColor("1;31"); // Bold Red
                             cout << "Invalid choice. Please try again." << endl;
+                            resetColor();
                         }
                     }
                 } else {
+                    setColor("1;31"); // Bold Red
                     cout << "Invalid account number or password." << endl;
+                    resetColor();
                 }
                 break;
             }
             case 2: {
                 string adminPass;
+                setColor("1;33"); // Bold Yellow
                 cout << "Enter Admin Password: ";
+                resetColor();
                 cin >> adminPass;
                 if (adminLogin(adminPass)) {
+                    setColor("1;32"); // Bold Green
                     cout << "Admin login successful!" << endl;
+                    resetColor();
                     int adminChoice;
                     while (true) {
+                        setColor("1;32"); // Bold Green
                         cout << "1. Show Accounts" << endl;
                         cout << "2. Create Account" << endl;
                         cout << "3. Delete Account" << endl;
-                        cout << "4. View Transaction History" << endl;
-                        cout << "5. Update Account Information" << endl;
-                        cout << "6. Close Account" << endl;
-                        cout << "7. Logout" << endl;
+                        cout << "4. Update Account Information" << endl;
+                        cout << "5. Logout" << endl;
+                        setColor("1;33"); // Bold Yellow
                         cout << "Enter your choice: ";
+                        resetColor();
                         cin >> adminChoice;
+                        clearScreen();
                         if (adminChoice == 1) {
                             account.showAccounts();
+                            int backChoice;
+                            setColor("1;32"); // Bold Green
+                            cout << "1. Back to Admin Menu" << endl;
+                            cout << "2. Main Menu" << endl;
+                            setColor("1;33"); // Bold Yellow
+                            cout << "Enter your choice: ";
+                            resetColor();
+                            cin >> backChoice;
+                            clearScreen();
+                            if (backChoice == 2) {
+                                break;
+                            }
                         } else if (adminChoice == 2) {
                             account.createAccount();
                         } else if (adminChoice == 3) {
                             string accNum, pass;
+                            setColor("1;33"); // Bold Yellow
                             cout << "Enter Account Number to delete: ";
+                            resetColor();
                             cin >> accNum;
+                            setColor("1;33"); // Bold Yellow
                             cout << "Enter Password: ";
+                            resetColor();
                             cin >> pass;
                             if (account.deleteAccount(accNum, pass)) {
+                                setColor("1;32"); // Bold Green
                                 cout << "Account deleted successfully." << endl;
+                                resetColor();
                             } else {
+                                setColor("1;31"); // Bold Red
                                 cout << "Invalid account number or password. Account not deleted." << endl;
+                                resetColor();
                             }
                         } else if (adminChoice == 4) {
-                            account.viewTransactionHistory();
-                        } else if (adminChoice == 5) {
                             string newAccountHolder;
+                            setColor("1;33"); // Bold Yellow
                             cout << "Enter new account holder name: ";
+                            resetColor();
                             cin >> newAccountHolder;
                             account.updateAccountInformation(newAccountHolder);
-                        } else if (adminChoice == 6) {
-                            account.closeAccount();
-                        } else if (adminChoice == 7) {
+                        } else if (adminChoice == 5) {
                             break;
                         } else {
+                            setColor("1;31"); // Bold Red
                             cout << "Invalid choice. Please try again." << endl;
+                            resetColor();
                         }
                     }
                 } else {
+                    setColor("1;31"); // Bold Red
                     cout << "Invalid admin password." << endl;
+                    resetColor();
                 }
                 break;
             }
             case 3:
                 return 0;
             default:
+                setColor("1;31"); // Bold Red
                 cout << "Invalid choice. Please try again." << endl;
+                resetColor();
         }
     }
     return 0;
