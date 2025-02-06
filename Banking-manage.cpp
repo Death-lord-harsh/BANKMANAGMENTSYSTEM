@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
-#include <cstdlib> // for atof
+#include <cstdlib> // for atof and system
 
 using namespace std;
 
@@ -74,15 +74,37 @@ public:
 
     void deposit(double amount) {
         balance += amount;
+        logTransaction("Deposit", amount);
         updateFile();
     }
 
     void withdraw(double amount) {
         if (amount <= balance) {
             balance -= amount;
+            logTransaction("Withdraw", amount);
             updateFile();
         } else {
             cout << "Insufficient balance." << endl;
+        }
+    }
+
+    void viewTransactionHistory() {
+        ifstream inFile("money.txt");
+        if (inFile.is_open()) {
+            string line;
+            cout << left << setw(10) << "Type" << setw(10) << "Amount" << setw(10) << "Balance" << endl;
+            cout << "-----------------------------------" << endl;
+            while (getline(inFile, line)) {
+                stringstream ss(line);
+                string type, amountStr, balanceStr;
+                getline(ss, type, ',');
+                getline(ss, amountStr, ',');
+                getline(ss, balanceStr, ',');
+                cout << left << setw(10) << type << setw(10) << amountStr << setw(10) << balanceStr << endl;
+            }
+            inFile.close();
+        } else {
+            cout << "No transaction history found." << endl;
         }
     }
 
@@ -125,11 +147,29 @@ private:
             cout << "Unable to open file for updating." << endl;
         }
     }
+
+    void logTransaction(const string& type, double amount) {
+        ofstream outFile("money.txt", ios::app);
+        if (outFile.is_open()) {
+            outFile << type << "," << amount << "," << fixed << setprecision(2) << balance << endl;
+            outFile.close();
+        } else {
+            cout << "Unable to open transaction log file." << endl;
+        }
+    }
 };
 
 bool adminLogin(const string& adminPass) {
     const string correctAdminPass = "admin123"; // Example admin password
     return adminPass == correctAdminPass;
+}
+
+void clearScreen() {
+#ifdef _WIN32
+    system("CLS");
+#else
+    system("clear");
+#endif
 }
 
 int main() {
@@ -145,6 +185,7 @@ int main() {
         cout << "5. Exit" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
+        clearScreen(); // Clear the screen after entering the choice
 
         switch (choice) {
             case 1:
@@ -165,9 +206,11 @@ int main() {
                     while (true) {
                         cout << "1. Deposit" << endl;
                         cout << "2. Withdraw" << endl;
-                        cout << "3. Logout" << endl;
+                        cout << "3. View Transaction History" << endl;
+                        cout << "4. Logout" << endl;
                         cout << "Enter your choice: ";
                         cin >> transChoice;
+                        clearScreen(); // Clear the screen after entering the choice
                         if (transChoice == 1) {
                             double amount;
                             cout << "Enter amount to deposit: ";
@@ -181,6 +224,8 @@ int main() {
                             account.withdraw(amount);
                             cout << "Withdrawal successful. New balance: " << account.balance << endl;
                         } else if (transChoice == 3) {
+                            account.viewTransactionHistory();
+                        } else if (transChoice == 4) {
                             break;
                         } else {
                             cout << "Invalid choice. Please try again." << endl;
