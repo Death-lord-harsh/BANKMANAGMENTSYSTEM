@@ -67,29 +67,51 @@ public:
     }
 
     bool login(const string& accNum, const string& pass) {
-        ifstream inFile("accounts.txt");
-        if (inFile.is_open()) {
-            string line;
-            while (getline(inFile, line)) {
-                stringstream ss(line);
-                string storedAccNum, storedAccHolder, storedBalanceStr, storedPassword;
-                getline(ss, storedAccNum, ',');
-                getline(ss, storedAccHolder, ',');
-                getline(ss, storedBalanceStr, ',');
-                getline(ss, storedPassword, ',');
-                if (storedAccNum == accNum && storedPassword == pass) {
-                    accountNumber = storedAccNum;
-                    accountHolder = storedAccHolder;
-                    balance = atof(storedBalanceStr.c_str());
-                    password = storedPassword;
-                    return true;
+    ifstream inFile("accounts.txt");
+    if (inFile.is_open()) {
+        string line;
+        while (getline(inFile, line)) {
+            stringstream ss(line);
+            string storedAccNum, storedAccHolder, storedBalanceStr, storedPassword;
+            getline(ss, storedAccNum, ',');
+            getline(ss, storedAccHolder, ',');
+            getline(ss, storedBalanceStr, ',');
+            getline(ss, storedPassword, ',');
+            if (storedAccNum == accNum && storedPassword == pass) {
+                accountNumber = storedAccNum;
+                accountHolder = storedAccHolder;
+                balance = atof(storedBalanceStr.c_str());
+                password = storedPassword;
+                // Load additional details from userinfo.txt
+                ifstream userInfoFile("userinfo.txt");
+                if (userInfoFile.is_open()) {
+                    string userInfoLine;
+                    while (getline(userInfoFile, userInfoLine)) {
+                        stringstream ssUserInfo(userInfoLine);
+                        string userAccNum, userAddress, userAge, userGender, userDob;
+                        getline(ssUserInfo, userAccNum, ',');
+                        getline(ssUserInfo, accountHolder, ',');
+                        getline(ssUserInfo, userAddress, ',');
+                        getline(ssUserInfo, userAge, ',');
+                        getline(ssUserInfo, userGender, ',');
+                        getline(ssUserInfo, userDob, ',');
+                        if (userAccNum == accNum) {
+                            address = userAddress;
+                            age = stoi(userAge);
+                            gender = userGender;
+                            dob = userDob;
+                            break;
+                        }
+                    }
+                    userInfoFile.close();
                 }
+                return true;
             }
-            inFile.close();
         }
-        return false;
+        inFile.close();
     }
-
+    return false;
+}
     void showAccounts() {
         ifstream inFile("accounts.txt");
         if (inFile.is_open()) {
@@ -179,17 +201,17 @@ public:
         return accountDeleted;
     }
 
-    void viewAccountDetails() {
-        setColor("1;34"); // Bold Blue
-        cout << "Account Number: " << accountNumber << endl;
-        cout << "Account Holder: " << accountHolder << endl;
-        cout << "Address: " << address << endl;
-        cout << "Age: " << age << endl;
-        cout << "Gender: " << gender << endl;
-        cout << "Date of Birth: " << dob << endl;
-        cout << "Balance: " << fixed << setprecision(2) << balance << endl;
-        resetColor();
-    }
+   void viewAccountDetails() {
+    setColor("1;34"); // Bold Blue
+    cout << "Account Number: " << accountNumber << endl;
+    cout << "Account Holder: " << accountHolder << endl;
+    cout << "Address: " << address << endl;
+    cout << "Age: " << age << endl;
+    cout << "Gender: " << gender << endl;
+    cout << "Date of Birth: " << dob << endl;
+    cout << "Balance: " << fixed << setprecision(2) << balance << endl;
+    resetColor();
+}
 
     void changePassword(const string& newPass) {
         if (newPass.empty()) {
@@ -512,7 +534,7 @@ int main() {
                                 setColor("1;32"); // Bold Green
                                 cout << "Account deleted successfully." << endl;
                                 resetColor();
-                            } else{
+                            } else {
                                 setColor("1;31"); // Bold Red
                                 cout << "Invalid account number or password. Account not deleted." << endl;
                                 resetColor();
