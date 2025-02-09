@@ -39,6 +39,10 @@ class Account {
 public:
     string accountNumber;
     string accountHolder;
+    string address;
+    int age;
+    string gender;
+    string dob;
     double balance;
     string password;
 
@@ -179,6 +183,10 @@ public:
         setColor("1;34"); // Bold Blue
         cout << "Account Number: " << accountNumber << endl;
         cout << "Account Holder: " << accountHolder << endl;
+        cout << "Address: " << address << endl;
+        cout << "Age: " << age << endl;
+        cout << "Gender: " << gender << endl;
+        cout << "Date of Birth: " << dob << endl;
         cout << "Balance: " << fixed << setprecision(2) << balance << endl;
         resetColor();
     }
@@ -225,13 +233,42 @@ public:
     }
 
     void updateAccountInformation(const string& newAccountHolder) {
-        if (newAccountHolder.empty()) {
-            setColor("1;31"); // Bold Red
-            cout << "Account holder name cannot be empty." << endl;
+        setColor("1;33"); // Bold Yellow
+        cout << "Enter new account holder name: ";
+        resetColor();
+        cin >> accountHolder;
+        setColor("1;33"); // Bold Yellow
+        cout << "Enter address: ";
+        resetColor();
+        cin.ignore(); // to ignore the newline character left by previous input
+        getline(cin, address);
+        setColor("1;33"); // Bold Yellow
+        cout << "Enter age: ";
+        resetColor();
+        cin >> age;
+        setColor("1;33"); // Bold Yellow
+        cout << "Enter gender: ";
+        resetColor();
+        cin >> gender;
+        setColor("1;33"); // Bold Yellow
+        cout << "Enter date of birth (dd-mm-yyyy): ";
+        resetColor();
+        cin >> dob;
+
+        // Save to userinfo.txt
+        ofstream outFile("userinfo.txt", ios::app);
+        if (outFile.is_open()) {
+            outFile << accountNumber << "," << accountHolder << "," << address << "," << age << "," << gender << "," << dob << endl;
+            outFile.close();
+            setColor("1;32"); // Bold Green
+            cout << "Account information updated and saved to userinfo.txt successfully!" << endl;
             resetColor();
-            return;
+        } else {
+            setColor("1;31"); // Bold Red
+            cout << "Unable to open userinfo.txt for writing." << endl;
+            resetColor();
         }
-        accountHolder = newAccountHolder;
+
         updateFile();
         setColor("1;32"); // Bold Green
         cout << "Account information updated successfully!" << endl;
@@ -475,7 +512,7 @@ int main() {
                                 setColor("1;32"); // Bold Green
                                 cout << "Account deleted successfully." << endl;
                                 resetColor();
-                            } else {
+                            } else{
                                 setColor("1;31"); // Bold Red
                                 cout << "Invalid account number or password. Account not deleted." << endl;
                                 resetColor();
