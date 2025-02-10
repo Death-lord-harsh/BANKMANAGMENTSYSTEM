@@ -47,24 +47,65 @@ public:
     string password;
 
     void createAccount() {
+    setColor("1;32"); // Bold Green
+    cout << "Enter Account Number: ";
+    resetColor();
+    cin >> accountNumber;
+
+    setColor("1;32"); // Bold Green
+    cout << "Enter Account Holder Name: ";
+    resetColor();
+    cin >> accountHolder;
+
+    setColor("1;32"); // Bold Green
+    cout << "Enter Initial Balance: ";
+    resetColor();
+    cin >> balance;
+
+    setColor("1;32"); // Bold Green
+    cout << "Set Password: ";
+    resetColor();
+    cin >> password;
+
+    setColor("1;32"); // Bold Green
+    cout << "Enter Address: ";
+    resetColor();
+    cin.ignore(); // to ignore the newline character left by previous input
+    getline(cin, address);
+
+    setColor("1;32"); // Bold Green
+    cout << "Enter Age: ";
+    resetColor();
+    cin >> age;
+
+    setColor("1;32"); // Bold Green
+    cout << "Enter Gender: ";
+    resetColor();
+    cin >> gender;
+
+    setColor("1;32"); // Bold Green
+    cout << "Enter Date of Birth (dd-mm-yyyy): ";
+    resetColor();
+    cin >> dob;
+
+    saveToFile();
+    saveToUserInfo();
+}
+
+void saveToUserInfo() {
+    ofstream outFile("userinfo.txt", ios::app);
+    if (outFile.is_open()) {
+        outFile << accountNumber << "," << accountHolder << "," << address << "," << age << "," << gender << "," << dob << endl;
+        outFile.close();
         setColor("1;32"); // Bold Green
-        cout << "Enter Account Number: ";
+        cout << "Account information saved to userinfo.txt successfully!" << endl;
         resetColor();
-        cin >> accountNumber;
-        setColor("1;32"); // Bold Green
-        cout << "Enter Account Holder Name: ";
+    } else {
+        setColor("1;31"); // Bold Red
+        cout << "Unable to open userinfo.txt for writing." << endl;
         resetColor();
-        cin >> accountHolder;
-        setColor("1;32"); // Bold Green
-        cout << "Enter Initial Balance: ";
-        resetColor();
-        cin >> balance;
-        setColor("1;32"); // Bold Green
-        cout << "Set Password: ";
-        resetColor();
-        cin >> password;
-        saveToFile();
     }
+}
 
     bool login(const string& accNum, const string& pass) {
     ifstream inFile("accounts.txt");
