@@ -544,86 +544,70 @@ int main() {
                 }
                 break;
             }
-            case 2: {
-                string adminPass;
+
+            case 2: { // Admin Login
+    string adminPass;
+    setColor("1;33"); // Bold Yellow
+    cout << "Enter Admin Password: ";
+    resetColor();
+    cin >> adminPass;
+    if (adminLogin(adminPass)) {
+        setColor("1;32"); // Bold Green
+        cout << "Admin login successful!" << endl;
+        resetColor();
+        int adminChoice;
+        while (true) {
+            setColor("1;32"); // Bold Green
+            cout << "1. Show Accounts" << endl;
+            cout << "2. Create Account" << endl;
+            cout << "3. Delete Account" << endl;
+            cout << "4. Update Account Information" << endl;
+            cout << "5. Logout" << endl;
+            setColor("1;33"); // Bold Yellow
+            cout << "Enter your choice: ";
+            resetColor();
+            cin >> adminChoice;
+            clearScreen();
+            if (adminChoice == 1) {
+                account.showAccounts();
+            } else if (adminChoice == 2) {
+                account.createAccount();
+            } else if (adminChoice == 3) {
+                string accNum, pass;
                 setColor("1;33"); // Bold Yellow
-                cout << "Enter Admin Password: ";
+                cout << "Enter Account Number to delete: ";
                 resetColor();
-                cin >> adminPass;
-                if (adminLogin(adminPass)) {
+                cin >> accNum;
+                setColor("1;33"); // Bold Yellow
+                cout << "Enter Password: ";
+                resetColor();
+                cin >> pass;
+                if (account.deleteAccount(accNum, pass)) {
                     setColor("1;32"); // Bold Green
-                    cout << "Admin login successful!" << endl;
+                    cout << "Account deleted successfully." << endl;
                     resetColor();
-                    int adminChoice;
-                    while (true) {
-                        setColor("1;32"); // Bold Green
-                        cout << "1. Show Accounts" << endl;
-                        cout << "2. Create Account" << endl;
-                        cout << "3. Delete Account" << endl;
-                        cout << "4. Update Account Information" << endl;
-                        cout << "5. Logout" << endl;
-                        setColor("1;33"); // Bold Yellow
-                        cout << "Enter your choice: ";
-                        resetColor();
-                        cin >> adminChoice;
-                        clearScreen();
-                        if (adminChoice == 1) {
-                            account.showAccounts();
-                            int backChoice;
-                            setColor("1;32"); // Bold Green
-                            cout << "1. Back to Admin Menu" << endl;
-                            cout << "2. Main Menu" << endl;
-                            setColor("1;33"); // Bold Yellow
-                            cout << "Enter your choice: ";
-                            resetColor();
-                            cin >> backChoice;
-                            clearScreen();
-                            if (backChoice == 2) {
-                                break;
-                            }
-                        } else if (adminChoice == 2) {
-                            account.createAccount();
-                        } else if (adminChoice == 3) {
-                            string accNum, pass;
-                            setColor("1;33"); // Bold Yellow
-                            cout << "Enter Account Number to delete: ";
-                            resetColor();
-                            cin >> accNum;
-                            setColor("1;33"); // Bold Yellow
-                            cout << "Enter Password: ";
-                            resetColor();
-                            cin >> pass;
-                            if (account.deleteAccount(accNum, pass)) {
-                                setColor("1;32"); // Bold Green
-                                cout << "Account deleted successfully." << endl;
-                                resetColor();
-                            } else {
-                                setColor("1;31"); // Bold Red
-                                cout << "Invalid account number or password. Account not deleted." << endl;
-                                resetColor();
-                            }
-                        } else if (adminChoice == 4) {
-                            string newAccountHolder;
-                            setColor("1;33"); // Bold Yellow
-                            cout << "Enter new account holder name: ";
-                            resetColor();
-                            cin >> newAccountHolder;
-                            account.updateAccountInformation(newAccountHolder);
-                        } else if (adminChoice == 5) {
-                            break;
-                        } else {
-                            setColor("1;31"); // Bold Red
-                            cout << "Invalid choice. Please try again." << endl;
-                            resetColor();
-                        }
-                    }
                 } else {
                     setColor("1;31"); // Bold Red
-                    cout << "Invalid admin password." << endl;
+                    cout << "Invalid account number or password. Account not deleted." << endl;
                     resetColor();
                 }
+            } else if (adminChoice == 4) {
+                account.updateAccountInformation(); // Place the call here
+            } else if (adminChoice == 5) {
                 break;
+            } else {
+                setColor("1;31"); // Bold Red
+                cout << "Invalid choice. Please try again." << endl;
+                resetColor();
             }
+        }
+    } else {
+        setColor("1;31"); // Bold Red
+        cout << "Invalid admin password." << endl;
+        resetColor();
+    }
+    break;
+}
             case 3:
                 return 0;
             default:
