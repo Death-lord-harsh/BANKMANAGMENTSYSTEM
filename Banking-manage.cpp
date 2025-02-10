@@ -297,49 +297,69 @@ void saveToUserInfo() {
         }
     }
 
-    void updateAccountInformation(const string& newAccountHolder) {
-        setColor("1;33"); // Bold Yellow
-        cout << "Enter new account holder name: ";
-        resetColor();
-        cin >> accountHolder;
-        setColor("1;33"); // Bold Yellow
-        cout << "Enter address: ";
-        resetColor();
-        cin.ignore(); // to ignore the newline character left by previous input
-        getline(cin, address);
-        setColor("1;33"); // Bold Yellow
-        cout << "Enter age: ";
-        resetColor();
-        cin >> age;
-        setColor("1;33"); // Bold Yellow
-        cout << "Enter gender: ";
-        resetColor();
-        cin >> gender;
-        setColor("1;33"); // Bold Yellow
-        cout << "Enter date of birth (dd-mm-yyyy): ";
-        resetColor();
-        cin >> dob;
+   void updateAccountInformation() {
+    string accNum;
+    setColor("1;33"); // Bold Yellow
+    cout << "Enter account number to update: ";
+    resetColor();
+    cin >> accNum;
+    cin.ignore(); // to ignore the newline character left by previous input
 
-        // Save to userinfo.txt
-        ofstream outFile("userinfo.txt", ios::app);
-        if (outFile.is_open()) {
-            outFile << accountNumber << "," << accountHolder << "," << address << "," << age << "," << gender << "," << dob << endl;
-            outFile.close();
-            setColor("1;32"); // Bold Green
-            cout << "Account information updated and saved to userinfo.txt successfully!" << endl;
-            resetColor();
-        } else {
-            setColor("1;31"); // Bold Red
-            cout << "Unable to open userinfo.txt for writing." << endl;
-            resetColor();
+    setColor("1;33"); // Bold Yellow
+    cout << "Enter new account holder name: ";
+    resetColor();
+    getline(cin, accountHolder);
+
+    setColor("1;33"); // Bold Yellow
+    cout << "Enter address: ";
+    resetColor();
+    getline(cin, address);
+
+    setColor("1;33"); // Bold Yellow
+    cout << "Enter age: ";
+    resetColor();
+    cin >> age;
+
+    setColor("1;33"); // Bold Yellow
+    cout << "Enter gender: ";
+    resetColor();
+    cin >> gender;
+
+    setColor("1;33"); // Bold Yellow
+    cout << "Enter date of birth (dd-mm-yyyy): ";
+    resetColor();
+    cin >> dob;
+
+    // Update userinfo.txt
+    ifstream inFile("userinfo.txt");
+    ofstream tempFile("temp.txt");
+    if (inFile.is_open() && tempFile.is_open()) {
+        string line;
+        while (getline(inFile, line)) {
+            stringstream ss(line);
+            string storedAccNum;
+            getline(ss, storedAccNum, ',');
+            if (storedAccNum == accNum) {
+                tempFile << accNum << "," << accountHolder << "," << address << "," << age << "," << gender << "," << dob << endl;
+            } else {
+                tempFile << line << endl;
+            }
         }
-
-        updateFile();
+        inFile.close();
+        tempFile.close();
+        remove("userinfo.txt");
+        rename("temp.txt", "userinfo.txt");
         setColor("1;32"); // Bold Green
         cout << "Account information updated successfully!" << endl;
         resetColor();
+    } else {
+        setColor("1;31"); // Bold Red
+        cout << "Unable to open userinfo.txt for updating." << endl;
+        resetColor();
     }
-
+} 
+    
+    
 private:
     void saveToFile() {
         ofstream outFile("accounts.txt", ios::app);
