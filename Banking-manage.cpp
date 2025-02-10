@@ -46,16 +46,18 @@ public:
     double balance;
     string password;
 
-    void createAccount() {
+    
+void createAccount() {
     setColor("1;32"); // Bold Green
     cout << "Enter Account Number: ";
     resetColor();
     cin >> accountNumber;
+    cin.ignore(); // Ignore the newline character left by previous input
 
     setColor("1;32"); // Bold Green
     cout << "Enter Account Holder Name: ";
     resetColor();
-    cin >> accountHolder;
+    getline(cin, accountHolder); // Use getline to allow spaces in the name
 
     setColor("1;32"); // Bold Green
     cout << "Enter Initial Balance: ";
