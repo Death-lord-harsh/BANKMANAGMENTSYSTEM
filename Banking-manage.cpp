@@ -46,7 +46,13 @@ public:
     double balance;
     string password;
 
-    
+
+if (!inFile.is_open()) {
+    setColor("1;31"); // Bold Red
+    cout << "Error opening file." << endl;
+    resetColor();
+    return;
+}
 void createAccount() {
     setColor("1;32"); // Bold Green
     cout << "Enter Account Number: ";
