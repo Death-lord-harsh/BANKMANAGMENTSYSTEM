@@ -357,6 +357,37 @@ void saveToUserInfo() {
         cout << "Unable to open userinfo.txt for updating." << endl;
         resetColor();
     }
+       // Update accounts.txt
+    ifstream inFileAccounts("accounts.txt");
+    ofstream tempFileAccounts("temp_accounts.txt");
+    if (inFileAccounts.is_open() && tempFileAccounts.is_open()) {
+        string line;
+        while (getline(inFileAccounts, line)) {
+            stringstream ss(line);
+            string storedAccNum, storedAccHolder, storedBalanceStr, storedPassword;
+            getline(ss, storedAccNum, ',');
+            getline(ss, storedAccHolder, ',');
+            getline(ss, storedBalanceStr, ',');
+            getline(ss, storedPassword, ',');
+            if (storedAccNum == accNum) {
+                tempFileAccounts << accNum << "," << accountHolder << "," << balance << "," << password << endl;
+            } else {
+                tempFileAccounts << line << endl;
+            }
+        }
+        inFileAccounts.close();
+        tempFileAccounts.close();
+        remove("accounts.txt");
+        rename("temp_accounts.txt", "accounts.txt");
+        setColor("1;32"); // Bold Green
+        cout << "Account information updated successfully in accounts.txt!" << endl;
+        resetColor();
+    } else {
+        setColor("1;31"); // Bold Red
+        cout << "Unable to open accounts.txt for updating." << endl;
+        resetColor();
+    }
+
 } 
     
     
