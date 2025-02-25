@@ -21,7 +21,7 @@ void setColor(const string& colorCode) {
 }
 
 void resetColor() {
-    cout << "\033[0m";
+    cout << "\033[m";
 }
 
 void printBanner() {
@@ -47,12 +47,7 @@ public:
     string password;
 
 
-if (!inFile.is_open()) {
-    setColor("1;31"); // Bold Red
-    cout << "Error opening file." << endl;
-    resetColor();
-    return;
-}
+
 void createAccount() {
     setColor("1;32"); // Bold Green
     cout << "Enter Account Number: ";
@@ -106,7 +101,7 @@ void saveToUserInfo() {
         outFile << accountNumber << "," << accountHolder << "," << address << "," << age << "," << gender << "," << dob << endl;
         outFile.close();
         setColor("1;32"); // Bold Green
-        cout << "Account information saved to userinfo.txt successfully!" << endl;
+        cout << "Account information saved  successfully!" << endl;
         resetColor();
     } else {
         setColor("1;31"); // Bold Red
@@ -386,7 +381,7 @@ void saveToUserInfo() {
         remove("accounts.txt");
         rename("temp_accounts.txt", "accounts.txt");
         setColor("1;32"); // Bold Green
-        cout << "Account information updated successfully in accounts.txt!" << endl;
+        cout << "Account information updated successfully " << endl;
         resetColor();
     } else {
         setColor("1;31"); // Bold Red
