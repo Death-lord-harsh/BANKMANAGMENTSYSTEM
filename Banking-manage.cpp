@@ -184,9 +184,7 @@ void saveToUserInfo() {
         }
     }
 
-   void deposit() {
-    double amount;
-
+   void deposit(double amount) {
     int num500 = 0, num100 = 0, num20 = 0, num10 = 0;
 
     if (amount >= 500) {
@@ -211,20 +209,15 @@ void saveToUserInfo() {
     }
 
     double totalAmount = (num500 * 500) + (num100 * 100) + (num20 * 20) + (num10 * 10);
-    if (totalAmount != amount) {
-        setColor("1;31"); // Bold Red
-        cout << "Error: The total amount of notes does not match the amount to be deposited." << endl;
-        resetColor();
-        return;
-    }
+    
     if (totalAmount <= 0) {
         setColor("1;31"); // Bold Red
         cout << "Invalid deposit amount." << endl;
         resetColor();
         return;
     }
-    balance += totalAmount;
-    logTransaction("Deposit", totalAmount);
+    balance += amount;
+    logTransaction("Deposit", amount);
     updateFile();
 
     // Display the number of notes and total amount added in tabular form
@@ -235,7 +228,7 @@ void saveToUserInfo() {
     cout << left << setw(10) << "20" << setw(10) << num20 << setw(10) << num20 * 20 << endl;
     cout << left << setw(10) << "10" << setw(10) << num10 << setw(10) << num10 * 10 << endl;
     cout << "---------------------------------" << endl;
-    cout << left << setw(10) << "Total" << setw(10) << "" << setw(10) << totalAmount << endl;
+    cout << left << setw(10) << "Total" << setw(10) << "" << setw(10) << amount << endl;
 }
 
     void withdraw(double amount) {
@@ -549,15 +542,15 @@ int main() {
                         cin >> transChoice;
                         clearScreen();
                         if (transChoice == 1) {
-                            double amount;
-                            setColor("1;33"); // Bold Yellow
-                            cout << "Enter amount to deposit: ";
-                            resetColor();
-                            cin >> amount;
-                            account.deposit(); 
-                            setColor("1;32"); // Bold Green
-                            cout << "Deposit successful. New balance: " << account.balance << endl;
-                            resetColor();
+                           double amount;
+              				  setColor("1;33"); // Bold Yellow
+                			cout << "Enter amount to deposit: ";
+                			resetColor();
+                			cin >> amount;
+                			account.deposit(totalAmount ); 
+                			setColor("1;32"); // Bold Green
+                			cout << "Deposit successful. New balance: " << account.balance << endl;
+                			resetColor();
                         } else if (transChoice == 2) {
                             double amount;
                             setColor("1;33"); // Bold Yellow
