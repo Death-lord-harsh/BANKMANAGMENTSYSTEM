@@ -186,18 +186,29 @@ void saveToUserInfo() {
 
    void deposit() {
     double amount;
-    cout << "Enter amount to deposit: ";
-    cin >> amount;
 
     int num500 = 0, num100 = 0, num20 = 0, num10 = 0;
-    cout << "Enter number of 500 rs notes: ";
-    cin >> num500;
-    cout << "Enter number of 100 rs notes: ";
-    cin >> num100;
-    cout << "Enter number of 20 rs notes: ";
-    cin >> num20;
-    cout << "Enter number of 10 rs notes: ";
-    cin >> num10;
+
+    if (amount >= 500) {
+        cout << "Enter number of 500 rs notes: ";
+        cin >> num500;
+        amount -= num500 * 500;
+    }
+    if (amount >= 100) {
+        cout << "Enter number of 100 rs notes: ";
+        cin >> num100;
+        amount -= num100 * 100;
+    }
+    if (amount >= 20) {
+        cout << "Enter number of 20 rs notes: ";
+        cin >> num20;
+        amount -= num20 * 20;
+    }
+    if (amount >= 10) {
+        cout << "Enter number of 10 rs notes: ";
+        cin >> num10;
+        amount -= num10 * 10;
+    }
 
     double totalAmount = (num500 * 500) + (num100 * 100) + (num20 * 20) + (num10 * 10);
     if (totalAmount != amount) {
@@ -216,13 +227,15 @@ void saveToUserInfo() {
     logTransaction("Deposit", totalAmount);
     updateFile();
 
-    // Display the number of notes and total amount added
-    cout << "You have deposited:" << endl;
-    cout << "500 rs notes: " << num500 << " (Total: " << num500 * 500 << " rs)" << endl;
-    cout << "100 rs notes: " << num100 << " (Total: " << num100 * 100 << " rs)" << endl;
-    cout << "20 rs notes: " << num20 << " (Total: " << num20 * 20 << " rs)" << endl;
-    cout << "10 rs notes: " << num10 << " (Total: " << num10 * 10 << " rs)" << endl;
-    cout << "Total amount deposited: " << totalAmount << " rs" << endl;
+    // Display the number of notes and total amount added in tabular form
+    cout << left << setw(10) << "Note" << setw(10) << "Count" << setw(10) << "Total" << endl;
+    cout << "---------------------------------" << endl;
+    cout << left << setw(10) << "500" << setw(10) << num500 << setw(10) << num500 * 500 << endl;
+    cout << left << setw(10) << "100" << setw(10) << num100 << setw(10) << num100 * 100 << endl;
+    cout << left << setw(10) << "20" << setw(10) << num20 << setw(10) << num20 * 20 << endl;
+    cout << left << setw(10) << "10" << setw(10) << num10 << setw(10) << num10 * 10 << endl;
+    cout << "---------------------------------" << endl;
+    cout << left << setw(10) << "Total" << setw(10) << "" << setw(10) << totalAmount << endl;
 }
 
     void withdraw(double amount) {
