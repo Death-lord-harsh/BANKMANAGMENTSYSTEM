@@ -184,17 +184,46 @@ void saveToUserInfo() {
         }
     }
 
-    void deposit(double amount) {
-        if (amount <= 0) {
-            setColor("1;31"); // Bold Red
-            cout << "Invalid deposit amount." << endl;
-            resetColor();
-            return;
-        }
-        balance += amount;
-        logTransaction("Deposit", amount);
-        updateFile();
+   void deposit() {
+    double amount;
+    cout << "Enter amount to deposit: ";
+    cin >> amount;
+
+    int num500 = 0, num100 = 0, num20 = 0, num10 = 0;
+    cout << "Enter number of 500 rs notes: ";
+    cin >> num500;
+    cout << "Enter number of 100 rs notes: ";
+    cin >> num100;
+    cout << "Enter number of 20 rs notes: ";
+    cin >> num20;
+    cout << "Enter number of 10 rs notes: ";
+    cin >> num10;
+
+    double totalAmount = (num500 * 500) + (num100 * 100) + (num20 * 20) + (num10 * 10);
+    if (totalAmount != amount) {
+        setColor("1;31"); // Bold Red
+        cout << "Error: The total amount of notes does not match the amount to be deposited." << endl;
+        resetColor();
+        return;
     }
+    if (totalAmount <= 0) {
+        setColor("1;31"); // Bold Red
+        cout << "Invalid deposit amount." << endl;
+        resetColor();
+        return;
+    }
+    balance += totalAmount;
+    logTransaction("Deposit", totalAmount);
+    updateFile();
+
+    // Display the number of notes and total amount added
+    cout << "You have deposited:" << endl;
+    cout << "500 rs notes: " << num500 << " (Total: " << num500 * 500 << " rs)" << endl;
+    cout << "100 rs notes: " << num100 << " (Total: " << num100 * 100 << " rs)" << endl;
+    cout << "20 rs notes: " << num20 << " (Total: " << num20 * 20 << " rs)" << endl;
+    cout << "10 rs notes: " << num10 << " (Total: " << num10 * 10 << " rs)" << endl;
+    cout << "Total amount deposited: " << totalAmount << " rs" << endl;
+}
 
     void withdraw(double amount) {
         if (amount <= 0) {
@@ -512,7 +541,7 @@ int main() {
                             cout << "Enter amount to deposit: ";
                             resetColor();
                             cin >> amount;
-                            account.deposit(amount);
+                            account.deposit(); 
                             setColor("1;32"); // Bold Green
                             cout << "Deposit successful. New balance: " << account.balance << endl;
                             resetColor();
